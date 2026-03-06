@@ -1,68 +1,86 @@
-<!DOCTYPE html><html lang="en">
+<!DOCTYPE html><html>
 <head>
 <meta charset="UTF-8">
-<title>Heart Animation</title>
-<style>
+<title>Heart Shape Animation</title><style>
 body{
 margin:0;
 background:black;
 overflow:hidden;
-display:flex;
-justify-content:center;
-align-items:center;
-height:100vh;
-}canvas{
-position:absolute;
 }
-</style>
-
-</head>
-<body><canvas id="heart"></canvas>
+canvas{
+display:block;
+}
+</style></head><body><canvas id="c"></canvas>
 
 <script>
-const canvas = document.getElementById("heart");
+
+const canvas = document.getElementById("c");
 const ctx = canvas.getContext("2d");
 
 canvas.width = window.innerWidth;
 canvas.height = window.innerHeight;
 
-let t = 0;
+let particles = [];
 
-function heartFunction(t) {
+function heart(t){
 return {
-x: 16 * Math.pow(Math.sin(t),3),
-y: -(13*Math.cos(t) - 5*Math.cos(2*t) - 2*Math.cos(3*t) - Math.cos(4*t))
+x:16*Math.pow(Math.sin(t),3),
+y:13*Math.cos(t)-5*Math.cos(2*t)-2*Math.cos(3*t)-Math.cos(4*t)
 };
 }
 
-function draw() {
+for(let i=0;i<Math.PI*2;i+=0.03){
 
-ctx.fillStyle = "rgba(0,0,0,0.2)";
-ctx.fillRect(0,0,canvas.width,canvas.height);
+let pos = heart(i);
 
-ctx.strokeStyle = "white";
-ctx.lineWidth = 1;
-
-ctx.beginPath();
-
-for(let i=0;i<Math.PI*2;i+=0.01){
-
-let pos = heartFunction(i);
-
-let x = canvas.width/2 + pos.x*20;
-let y = canvas.height/2 + pos.y*20;
-
-ctx.lineTo(x,y);
+particles.push({
+x:canvas.width/2 + pos.x*20,
+y:canvas.height/2 - pos.y*20,
+vx:(Math.random()-0.5)*1.5,
+vy:(Math.random()-0.5)*1.5
+});
 
 }
 
-ctx.stroke();
+function draw(){
 
-t+=0.01;
+ctx.fillStyle="rgba(0,0,0,0.25)";
+ctx.fillRect(0,0,canvas.width,canvas.height);
+
+for(let i=0;i<particles.length;i++){
+
+let p = particles[i];
+
+p.x += p.vx;
+p.y += p.vy;
+
+if(p.x<0 || p.x>canvas.width) p.vx*=-1;
+if(p.y<0 || p.y>canvas.height) p.vy*=-1;
+
+for(let j=i+1;j<particles.length;j++){
+
+let p2 = particles[j];
+let dx=p.x-p2.x;
+let dy=p.y-p2.y;
+let dist=Math.sqrt(dx*dx+dy*dy);
+
+if(dist<40){
+ctx.beginPath();
+ctx.moveTo(p.x,p.y);
+ctx.lineTo(p2.x,p2.y);
+ctx.strokeStyle="white";
+ctx.lineWidth=0.5;
+ctx.stroke();
+}
+
+}
+
+}
 
 requestAnimationFrame(draw);
 }
 
 draw();
+
 </script></body>
 </html>
